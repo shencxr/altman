@@ -230,7 +230,6 @@ ostream& operator<<(ostream& os,node<T>* n){
     size_t NODE_INTERVAL=2;
     int NODE_WIDTH=2;
     size_t max_node_num=v2d.back().size();
-    size_t max_interval_num=max_node_num*2-1;
     size_t total_l=v2d.size();
 
     for(size_t l=0;l<total_l;l++){
@@ -240,28 +239,66 @@ ostream& operator<<(ostream& os,node<T>* n){
         size_t _interval=size_t(pow(2,total_l-l-1));
         size_t node_interval=size_t(pow(2,total_l-l)-1);
         for(int i=0;i<int(_interval*LEFT_INTERVAL);i++){
-            horizontal_line<<"*";
-            vertical_line<<"*";
-            node<<"*";
+            horizontal_line<<" ";
+            vertical_line<<" ";
+            node<<" ";
         }
         int c=0;
-        int total_node_in_l=int(pow(2,l));
+        int node_num=int(v2d[l].size());
         for(auto it=v2d[l].begin();it!=v2d[l].end();it++,c++){
-            if((*it)==nullptr){
-                node<<setw(NODE_WIDTH)<<"n";
-                for(int i=0;i<int(node_interval*NODE_INTERVAL);i++){
-                    node<<"-";
+            char linker=(*it)==nullptr?' ':'|';
+            auto f=[](stringstream& func_os,int length,char token){
+                for(int i=0;i<length;i++){
+                    func_os<<token;
+                }
+            };
+            if(c%2){
+                //right child
+                f(node,int(node_interval*NODE_INTERVAL)/2,'*');
+                if((*it)==nullptr){
+                    node<<setw(NODE_WIDTH)<<"$";
+                    f(horizontal_line,int(node_interval*NODE_INTERVAL)/2,'/');
+                    f(horizontal_line,int(NODE_WIDTH),'=');
+                }
+                else{
+                    node<<setw(NODE_WIDTH)<<(*it)->d;
+                    f(horizontal_line,int(node_interval*NODE_INTERVAL)/2,'-');
+                    f(horizontal_line,int(NODE_WIDTH),'-');
+                }
+                if(c+1!=node_num){
+                    f(node,int(node_interval*NODE_INTERVAL)/2,'*');
+                    f(horizontal_line,int(node_interval*NODE_INTERVAL)/2,'/');
                 }
             }
             else{
-                node<<setw(NODE_WIDTH)<<(*it)->d;
-                for(int i=0;i<int(node_interval*NODE_INTERVAL);i++){
-                    node<<"-";
+                //left child
+                if(c!=0){
+                    f(node,int(node_interval*NODE_INTERVAL)/2,'*');
+                    f(horizontal_line,int(node_interval*NODE_INTERVAL)/2,'/');
                 }
+                if((*it)==nullptr){
+                    node<<setw(NODE_WIDTH)<<"$";
+                    f(horizontal_line,int(NODE_WIDTH),'=');
+                    f(horizontal_line,int(node_interval*NODE_INTERVAL)/2,'/');
+
+                }
+                else{
+                    node<<setw(NODE_WIDTH)<<(*it)->d;
+                    f(horizontal_line,int(NODE_WIDTH),'-');
+                    f(horizontal_line,int(node_interval*NODE_INTERVAL)/2,'-');
+                }
+                if(c+1!=node_num){
+                    f(node,int(node_interval*NODE_INTERVAL)/2,'*');
+                }
+            }
+            f(vertical_line,int(NODE_WIDTH),linker);
+
+            if(c+1!=node_num){
+                f(vertical_line,int(node_interval*NODE_INTERVAL),'+');
             }
         }
         if(l!=0){
-//            os<<horizontal_line.str()<<endl;
+            os<<horizontal_line.str()<<endl;
         }
         os<<node.str()<<endl;
         if(l+1!=total_l){
@@ -408,12 +445,12 @@ int main(){
     testTree.insert(6);
     testTree.insert(3);
     testTree.insert(1);
-    testTree.insert(9);
+    testTree.insert(9);/*
     testTree.insert(2);
     testTree.insert(10);
     testTree.insert(9);
     testTree.insert(4);
-    testTree.insert(8);
+    testTree.insert(8);*/
 //    cout<<testTree<<endl;
     cout<<testTree.get_root();
 
