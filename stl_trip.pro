@@ -9,4 +9,5 @@ SOURCES += \
     test.cpp
 
 HEADERS += \
-    test_driver.h
+    test_driver.h \
+    binary_search_tree.h

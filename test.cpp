@@ -10,11 +10,10 @@
 #include <sstream>
 #include <stack>
 //#include <multiset>
-
+#include "binary_search_tree.h"
 #include <exception>
 #include <algorithm>
 using namespace std;
-
 
 class UsCounter{
 public:
@@ -121,301 +120,14 @@ int main1(){
 
 
 
-template<typename T>
-struct node{
-    node():left(nullptr),right(nullptr){}
-    node(T data,node *l=nullptr,node *r=nullptr):left(l),right(r),d(data){}
-
-    inline node<T>* left_node() const{
-        return left;
-    }
-    inline node<T>* right_node() const{
-        return right;
-    }
-    node *left;
-    node *right;
-    T d;
-};
-
-
-template<typename T>
-class Btree{
-public:
-    Btree():root(nullptr){}
-    Btree& insert(T value);
-    node<T>* get_root()const{
-        return root;
-    }
-    int find_node_level(node<T>* n);
-    int find_node_level(int n);
-protected:
-    Btree& _insert_recurve(node<T>* n,T value);
-    int _find_node_level(node<T> *src,node<T>* n);
-    int _find_node_level(node<T> *src,int n);
-private:
-    node<T> *root;
-};
 
 
 
-template<typename T>
-Btree<T> &Btree<T>::insert(T value)
-{
-    if(root==nullptr){
-//        cout<<value<<" add to root"<<endl;
-        root=new node<T>(value);
-        return *this;
-    }
-    return _insert_recurve(root,value);
-}
 
 
-template<typename T>
-Btree<T> &Btree<T>::_insert_recurve(node<T>* n,T value)
-{
-    if(n->d>value){
-        if(n->left!=nullptr){
-            return _insert_recurve(n->left,value);
-        }
-        else{
-//            cout<<value<<" add to "<<n->d<<" left"<<endl;
-            n->left=new node<T>(value);
-            return *this;
-        }
-    }
-    else if(n->d<value){
-        if(n->right!=nullptr){
-            return _insert_recurve(n->right,value);
-        }
-        else{
-//            cout<<value<<" add to "<<n->d<<" right"<<endl;
-            n->right=new node<T>(value);
-            return *this;
-        }
-    }
-    else{
-        return *this;
-    }
-}
-
-#include <map>
-#include <queue>
-#include <cmath>
-
-template<typename T>
-ostream& operator<<(ostream& os,node<T>* n){
-    vector<vector<node<T>*>> v2d;
-    v2d.push_back({n});
-
-    for (size_t i=0;;i++) {
-        vector<node<T>*> next_l;
-        for_each(v2d[i].begin(),v2d[i].end(),[&next_l](node<T>* _n){
-            if(_n!=nullptr){
-                next_l.push_back(_n->left_node());
-                next_l.push_back(_n->right_node());
-            }
-            else{
-                next_l.push_back(nullptr);
-                next_l.push_back(nullptr);
-            }
-        });
-        if(all_of(next_l.begin(),next_l.end(),[](node<T>* _n){return _n==nullptr?true:false;})==true){
-            break;
-        }
-        else{
-            v2d.push_back(next_l);
-        }
-    }
-    size_t LEFT_INTERVAL=2;
-    size_t NODE_INTERVAL=2;
-    int NODE_WIDTH=2;
-    size_t max_node_num=v2d.back().size();
-    size_t total_l=v2d.size();
-
-    for(size_t l=0;l<total_l;l++){
-        stringstream vertical_line;
-        stringstream horizontal_line;
-        stringstream node;
-        size_t _interval=size_t(pow(2,total_l-l-1));
-        size_t node_interval=size_t(pow(2,total_l-l)-1);
-        for(int i=0;i<int(_interval*LEFT_INTERVAL);i++){
-            horizontal_line<<" ";
-            vertical_line<<" ";
-            node<<" ";
-        }
-        int c=0;
-        int node_num=int(v2d[l].size());
-        for(auto it=v2d[l].begin();it!=v2d[l].end();it++,c++){
-            char linker=(*it)==nullptr?' ':'|';
-            auto f=[](stringstream& func_os,int length,char token){
-                for(int i=0;i<length;i++){
-                    func_os<<token;
-                }
-            };
-            if(c%2){
-                //right child
-                f(node,int(node_interval*NODE_INTERVAL)/2,'*');
-                if((*it)==nullptr){
-                    node<<setw(NODE_WIDTH)<<"$";
-                    f(horizontal_line,int(node_interval*NODE_INTERVAL)/2,'/');
-                    f(horizontal_line,int(NODE_WIDTH),'=');
-                }
-                else{
-                    node<<setw(NODE_WIDTH)<<(*it)->d;
-                    f(horizontal_line,int(node_interval*NODE_INTERVAL)/2,'-');
-                    f(horizontal_line,int(NODE_WIDTH),'-');
-                }
-                if(c+1!=node_num){
-                    f(node,int(node_interval*NODE_INTERVAL)/2,'*');
-                    f(horizontal_line,int(node_interval*NODE_INTERVAL)/2,'/');
-                }
-            }
-            else{
-                //left child
-                if(c!=0){
-                    f(node,int(node_interval*NODE_INTERVAL)/2,'*');
-                    f(horizontal_line,int(node_interval*NODE_INTERVAL)/2,'/');
-                }
-                if((*it)==nullptr){
-                    node<<setw(NODE_WIDTH)<<"$";
-                    f(horizontal_line,int(NODE_WIDTH),'=');
-                    f(horizontal_line,int(node_interval*NODE_INTERVAL)/2,'/');
-
-                }
-                else{
-                    node<<setw(NODE_WIDTH)<<(*it)->d;
-                    f(horizontal_line,int(NODE_WIDTH),'-');
-                    f(horizontal_line,int(node_interval*NODE_INTERVAL)/2,'-');
-                }
-                if(c+1!=node_num){
-                    f(node,int(node_interval*NODE_INTERVAL)/2,'*');
-                }
-            }
-            f(vertical_line,int(NODE_WIDTH),linker);
-
-            if(c+1!=node_num){
-                f(vertical_line,int(node_interval*NODE_INTERVAL),'+');
-            }
-        }
-        if(l!=0){
-            os<<horizontal_line.str()<<endl;
-        }
-        os<<node.str()<<endl;
-        if(l+1!=total_l){
-            os<<vertical_line.str()<<endl;
-        }
-    }
-    return os;
-}
 
 
-template<typename T>
-ostream& operator<<(ostream& os,Btree<T>& tree){
-    vector<node<T>*> vec1;
-    vec1.push_back(tree.get_root());
-    size_t index=0;
-    while (index!=vec1.size()) {
-        if(vec1[index]!=nullptr){
-            vec1.push_back(vec1[index]->right_node());
-            vec1.push_back(vec1[index]->left_node());
-        }
-        index++;
-    }
 
-    int l=-1;
-    auto kk=vec1.rbegin();
-    for(;kk!=vec1.rend();kk++){
-        if(*kk!=nullptr){
-            l=tree.find_node_level(*kk);
-            break;
-        }
-    }
-
-    int total_l=l;
-    stack<string> tree_str;
-    string line;
-    stringstream lines;
-    lines.clear();
-    cout<<"vec1.size = "<<vec1.size()<<endl;;
-    while(!vec1.empty()){
-        node<T>* it=vec1.back();
-        if(it!=nullptr){
-            if(l-1==tree.find_node_level(it)){
-                lines<<endl;
-                l--;
-                lines<<setw((total_l-l)*5)<<"";
-            }
-            lines<<setw(5)<<it->d;
-        }else{
-            lines<<setw(5)<<"";
-        }
-        lines<<setw(5)<<"";
-        vec1.pop_back();
-    }
-
-    os<<lines.str();
-    return os;
-}
-
-template<typename T>
-int Btree<T>::find_node_level(node<T> *n)
-{
-    if(root==nullptr||n==nullptr){
-        return -1;
-    }
-    return _find_node_level(root,n);
-}
-
-template<typename T>
-int Btree<T>::find_node_level(int n)
-{
-    if(root==nullptr){
-        return -1;
-    }
-    if(root->d==n){
-        return 0;
-    }
-    return _find_node_level(root,n);
-}
-
-
-template<typename T>
-int Btree<T>::_find_node_level(node<T> *src,node<T> *n)
-{
-    if(src==nullptr){
-        return -1;
-    }
-    else if(src->d==n->d){
-        return 0;
-    }
-    int h=_find_node_level(src->left_node(),n);
-    if(h==-1){
-        h=_find_node_level(src->right_node(),n);
-        return h==-1?-1:h+1;
-    }
-    else{
-        return h+1;
-    }
-}
-
-template<typename T>
-int Btree<T>::_find_node_level(node<T> *src,int n)
-{
-    if(src==nullptr){
-        return -1;
-    }
-    else if(src->d==n){
-        return 0;
-    }
-    int h=_find_node_level(src->left_node(),n);
-    if(h==-1){
-        h=_find_node_level(src->right_node(),n);
-        return h==-1?-1:h+1;
-    }
-    else{
-        return h+1;
-    }
-}
 
 
 class test_loop{
@@ -436,36 +148,40 @@ private:
 
 
 int main(){
-    Btree<int>  testTree;
-//    for(int i=0;i<5;i++){
-//        testTree.insert(i);
-//    }
-    testTree.insert(7);
-    testTree.insert(45);
-    testTree.insert(6);
-    testTree.insert(3);
-    testTree.insert(1);
-    testTree.insert(9);/*
-    testTree.insert(2);
-    testTree.insert(10);
-    testTree.insert(9);
-    testTree.insert(4);
-    testTree.insert(8);*/
-//    cout<<testTree<<endl;
-    cout<<testTree.get_root();
+    {
+        CBinarySearchTree<int>  testTree;
+//        for(int i=0;i<5;i++){
+//            testTree.insert(i);
+//        }
+        testTree.insert(7);
+        testTree.insert(45);
+        testTree.insert(6);
+        testTree.insert(3);
+        testTree.insert(1);
+        testTree.insert(9);
+        testTree.insert(2);
+        testTree.insert(10);
+        testTree.insert(9);
+        testTree.insert(4);
+        testTree.insert(8);
+//        cout<<testTree<<endl;
+        cout<<testTree;
 
-    cout<<"4 in level : "<<testTree.find_node_level(4)<<endl;
+//        cout<<"8 parent = "<<testTree.get_parent()
 
-    vector<int> vec1;
-    vec1.push_back(0);
-    size_t i=0;
-    vector<int>::iterator it=vec1.begin();
-    for(;it!=vec1.end()&&i<5;it++,i++){
-        vec1.push_back(int(i+1));
-        cout<<*it<<"  "<<vec1[i]<<"  "<<vec1.size()<<endl;;
+        cout<<"4 in level : "<<testTree.find_node_level(4)<<endl;
 
+        vector<int> vec1;
+        vec1.push_back(0);
+        size_t i=0;
+        vector<int>::iterator it=vec1.begin();
+        for(;it!=vec1.end()&&i<5;it++,i++){
+            vec1.push_back(int(i+1));
+            cout<<*it<<"  "<<vec1[i]<<"  "<<vec1.size()<<endl;;
+
+        }
+        cout<<vec1.size()<<endl;
     }
-    cout<<vec1.size()<<endl;
     {
         map<pair<int,int>,string> m;
         m.insert(pair<pair<int,int>,string>(pair<int,int>(3,3),"n"));
@@ -486,6 +202,8 @@ int main(){
         cout<<v2d[0].size()<<" "<<v2d[0][0]<<endl;
     }
     {
+        //测试loop的结束条件是函数时，会不会每循环一次后都被执行
+        //结论：v_adpt.size()每次都会被执行
         test_loop v_adpt;
         for(int i=0;i<5;i++){
             v_adpt.push_back(i);
@@ -495,6 +213,50 @@ int main(){
             cout<<v_adpt[i]<<" ";
         }
         cout<<endl;
+    }
+    system("cls");
+    {
+        CBinarySearchTree<int>  testTree;
+        testTree.insert(7);
+        testTree.insert(45);
+        testTree.insert(6);
+        testTree.insert(3);
+        testTree.insert(1);
+        testTree.insert(9);
+        testTree.insert(2);
+        testTree.insert(10);
+        testTree.insert(9);
+        testTree.insert(4);
+        testTree.insert(8);
+        cout<<endl<<testTree;
+        cout<<"del 2 : "<<testTree.remove(2)<<endl;
+        cout<<endl<<testTree;
+        cout<<"del 45 : "<<testTree.remove(45)<<endl;
+        cout<<endl<<testTree;
+        cout<<"del 9 : "<<testTree.remove(9)<<endl;
+        cout<<endl<<testTree;
+        system("cls");
+        cout<<"del 7 : "<<testTree.remove(7)<<endl;
+        cout<<endl<<testTree;
+        cout<<"del 3 : "<<testTree.remove(3)<<endl;
+        cout<<endl<<testTree;
+        cout<<"del 10 : "<<testTree.remove(10)<<endl;
+        cout<<endl<<testTree;
+        cout<<"del 18 : "<<testTree.remove(18)<<endl;
+        cout<<endl<<testTree;
+    }
+//    system("pause");
+    system("cls");
+    {
+        srand(rand());
+        CBinarySearchTree<int>  testTree;
+        for(int i=0;i<10;i++){
+            testTree.insert(rand()%13);
+        }
+        cout<<endl<<testTree;
+            system("pause");
+        cout<<"del 8 : "<<testTree.remove(8)<<endl;
+        cout<<endl<<testTree;
     }
     return 0;
 }
