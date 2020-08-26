@@ -13,6 +13,7 @@
 #include "binary_search_tree.h"
 #include <exception>
 #include <algorithm>
+#include "avl.h"
 using namespace std;
 
 class UsCounter{
@@ -147,7 +148,7 @@ private:
 };
 
 
-int main(){
+int bmain(){
     {
         CBinarySearchTree<int>  testTree;
 //        for(int i=0;i<5;i++){
@@ -248,7 +249,8 @@ int main(){
 //    system("pause");
     system("cls");
     {
-        srand(rand());
+
+        srand(static_cast<unsigned int>(rand()));
         CBinarySearchTree<int>  testTree;
         for(int i=0;i<10;i++){
             testTree.insert(rand()%13);
@@ -257,6 +259,10 @@ int main(){
             system("pause");
         cout<<"del 8 : "<<testTree.remove(8)<<endl;
         cout<<endl<<testTree;
+    }
+    {
+        AVLNode<int> a(3);
+        AVLNode<int> b(4,&a);
     }
     return 0;
 }

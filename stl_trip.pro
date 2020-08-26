@@ -6,8 +6,10 @@ CONFIG -= qt
 SOURCES += \
         main.cpp \
     test_driver.cpp \
-    test.cpp
+    test.cpp \
+    test_avl.cpp
 
 HEADERS += \
     test_driver.h \
-    binary_search_tree.h
+    binary_search_tree.h \
+    avl.h

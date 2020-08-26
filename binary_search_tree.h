@@ -11,16 +11,37 @@
 #include <iomanip>
 using namespace std;
 
+
 template<typename T>
-struct BaseNode{
+struct INode{
+    virtual INode* parent()const{return nullptr;}
+    virtual void parent(INode*){}
+    virtual INode* left_node()const{return nullptr;}
+    virtual void left_node(INode*){}
+    virtual INode* right_node()const{return nullptr;}
+    virtual void right_node(INode*){}
+    virtual T data()const{return T();}
+    virtual void data(T){}
+    virtual ~INode();
+};
+
+template<typename T>
+INode<T>::~INode(){}
+
+template<typename T>
+struct BaseNode:INode<T>{
     BaseNode():left(nullptr),right(nullptr){}
     BaseNode(T data,BaseNode *l=nullptr,BaseNode *r=nullptr):left(l),right(r),d(data){}
-
-    inline BaseNode<T>* left_node() const{
+    ~BaseNode(){}
+    inline INode<T>* left_node() const{
         return left;
     }
-    inline BaseNode<T>* right_node() const{
+    inline INode<T>* right_node() const{
         return right;
+    }
+
+    inline T data() const{
+        return d;
     }
 
     BaseNode *left;
@@ -28,14 +49,7 @@ struct BaseNode{
     T d;
 };
 
-template<typename T>
-struct AVLNode:public BaseNode<T>{
-    AVLNode():BaseNode<T>(),depth(0),parent(nullptr),balance_factor(0){}
-    AVLNode(T data,BaseNode<T> *l=nullptr,BaseNode<T> *r=nullptr,BaseNode<T> *p=nullptr):BaseNode<T>(data,l,r),depth(0),parent(p){}
-    BaseNode<T> *parent;
-    int depth;
-    int balance_factor;
-};
+
 
 template<typename T>
 class CBinarySearchTree{
@@ -48,12 +62,12 @@ public:
     }
     BaseNode<T>* get_parent(BaseNode<T>* n);
     int find_node_level(BaseNode<T>* n);
-    int find_node_level(int n);
+    int find_node_level(T n);
 protected:
     CBinarySearchTree& _insert_recurve(BaseNode<T>* &n,T value);
     BaseNode<T> *_get_parent_recurve(BaseNode<T>* r,BaseNode<T>* n);
-    int _find_node_level(BaseNode<T> *src,BaseNode<T>* n);
-    int _find_node_level(BaseNode<T> *src,int n);
+    int _find_node_level(INode<T> *src,INode<T>* n);
+    int _find_node_level(INode<T> *src, T n);
 private:
     BaseNode<T> *root;
 };
@@ -97,12 +111,12 @@ CBinarySearchTree<T> &CBinarySearchTree<T>::_insert_recurve(BaseNode<T>* &n,T va
 #define BETWEEN_LINKER      ' '
 template<typename T>
 ostream& operator<<(ostream& os,CBinarySearchTree<T>& tree){
-    vector<vector<BaseNode<T>*>> v2d;
+    vector<vector<INode<T>*>> v2d;
     v2d.push_back({tree.get_root()});
 
     for (size_t i=0;;i++) {
-        vector<BaseNode<T>*> next_l;
-        for_each(v2d[i].begin(),v2d[i].end(),[&next_l](BaseNode<T>* _n){
+        vector<INode<T>*> next_l;
+        for_each(v2d[i].begin(),v2d[i].end(),[&next_l](INode<T>* _n){
             if(_n!=nullptr){
                 next_l.push_back(_n->left_node());
                 next_l.push_back(_n->right_node());
@@ -112,7 +126,7 @@ ostream& operator<<(ostream& os,CBinarySearchTree<T>& tree){
                 next_l.push_back(nullptr);
             }
         });
-        if(all_of(next_l.begin(),next_l.end(),[](BaseNode<T>* _n){return _n==nullptr?true:false;})==true){
+        if(all_of(next_l.begin(),next_l.end(),[](INode<T>* _n){return _n==nullptr?true:false;})==true){
             break;
         }
         else{
@@ -157,7 +171,7 @@ ostream& operator<<(ostream& os,CBinarySearchTree<T>& tree){
                     f(horizontal_line,int(INTERVAL),NULL_NODE_TOP);
                 }
                 else{
-                    node<<setw(INTERVAL)<<(*it)->d;
+                    node<<setw(INTERVAL)<<(*it)->data();
                     f(horizontal_line,int(node_interval*INTERVAL)/2,BETEWEEN_TOP);
                     f(horizontal_line,int(INTERVAL),NODE_TOP);
                 }
@@ -179,7 +193,7 @@ ostream& operator<<(ostream& os,CBinarySearchTree<T>& tree){
 
                 }
                 else{
-                    node<<setw(INTERVAL)<<(*it)->d;
+                    node<<setw(INTERVAL)<<(*it)->data();
                     f(horizontal_line,int(INTERVAL),NODE_TOP);
                     f(horizontal_line,int(node_interval*INTERVAL)/2,BETEWEEN_TOP);
                 }
@@ -299,7 +313,7 @@ int CBinarySearchTree<T>::find_node_level(BaseNode<T> *n)
 }
 
 template<typename T>
-int CBinarySearchTree<T>::find_node_level(int n)
+int CBinarySearchTree<T>::find_node_level(T n)
 {
     if(root==nullptr){
         return -1;
@@ -314,7 +328,7 @@ int CBinarySearchTree<T>::find_node_level(int n)
 
 
 template<typename T>
-int CBinarySearchTree<T>::_find_node_level(BaseNode<T> *src,BaseNode<T> *n)
+int CBinarySearchTree<T>::_find_node_level(INode<T> *src, INode<T> *n)
 {
     if(src==nullptr){
         return -1;
@@ -333,12 +347,12 @@ int CBinarySearchTree<T>::_find_node_level(BaseNode<T> *src,BaseNode<T> *n)
 }
 
 template<typename T>
-int CBinarySearchTree<T>::_find_node_level(BaseNode<T> *src,int n)
+int CBinarySearchTree<T>::_find_node_level(INode<T> *src,T n)
 {
     if(src==nullptr){
         return -1;
     }
-    else if(src->d==n){
+    else if(src->data()==n){
         return 0;
     }
     int h=_find_node_level(src->left_node(),n);
