@@ -9,7 +9,7 @@
 template<typename T>
 struct AVLNode:public INode<T>{
 public:
-    AVLNode(T data=T(),AVLNode<T> *l=nullptr,AVLNode<T> *r=nullptr):_left(l),_right(r),_data(data),_depth(0){
+    AVLNode(T data=T(),AVLNode<T> *p=nullptr,AVLNode<T> *l=nullptr,AVLNode<T> *r=nullptr):_parent(p),_left(l),_right(r),_data(data),_height(0){
         if(l!=nullptr){
             l->parent(this);
         }
@@ -19,14 +19,59 @@ public:
     }
 
     AVLNode<T>* parent()const{return _parent;}
-    AVLNode<T>* left_node()const{return _left;}
+    AVLNode<T>* &left_node(){
+        return _left;}
     void left_node(AVLNode<T>*l){_left=l;}
-    AVLNode<T>* right_node()const{return _right;}
+    AVLNode<T>* &right_node(){return _right;}
     void right_node(AVLNode<T>*r){_right=r;}
     T data()const{return _data;}
     void data(T d){_data=d;}
-    int depth(void)const{return _depth;}
-    void depth(int d){_depth=d;}
+    int height(void)const{return _height;}
+    void height(int h){_height=h;}
+
+    AVLNode<T>* left_rotate(){
+        AVLNode<T>* tmp=_right;
+        _right=_right->_left;
+        if(_right!=nullptr){
+            _left->parent(this);
+        }
+        tmp->_left=this;
+        tmp->parent(_parent);
+        _parent=tmp;
+        return tmp;
+    }
+    AVLNode<T>* right_rotate(){
+        AVLNode<T>* tmp=_left;
+        _left=_left->_right;
+        if(_left!=nullptr){
+            _left->parent(this);
+        }
+        tmp->_right=this;
+        tmp->parent(_parent);
+        _parent=tmp;
+        return tmp;
+    }
+
+    AVLNode<T>* left_right_rotate(){
+        _left=_left->left_rotate();
+        return right_rotate();
+    }
+
+    AVLNode<T>* right_left_rotate(){
+        _right=_right->right_rotate();
+        return left_rotate();
+    }
+
+
+    static int height(AVLNode<T>* cur){
+        if(cur==nullptr){
+            return 0;
+        }
+        int l_h=height(cur->_left);
+        int r_h=height(cur->_right);
+        return max(l_h+1,r_h+1);
+    }
+
 
 private:
     void parent(AVLNode<T>* p){_parent=p;}
@@ -34,7 +79,7 @@ private:
     AVLNode<T> *_left;
     AVLNode<T> *_right;
     T _data;
-    int _depth;
+    int _height;
 };
 
 
@@ -42,10 +87,62 @@ private:
 template<typename T>
 class AVLTree{
 public:
+    AVLTree(AVLNode<T>* r=nullptr):root(r){}
     bool insert(T value);
     bool remove(T value);
     AVLNode<T>* get_root() const{
         return root;
+    }
+    void destory(){
+        _destory(root);
+    }
+    void preorder_print(void){
+        cout<<"preorder traversal  : ";
+        _preorder_print(root);
+        cout<<endl;
+    }
+    void inorder_print(void){
+        cout<<"inorder traversal   : ";
+        _inorder_print(root);
+        cout<<endl;
+    }
+    void postorder_print(void){
+        cout<<"postorder traversal : ";
+        _postorder_print(root);
+        cout<<endl;
+    }
+protected:
+    bool _remove(AVLNode<T> *n,T value);
+    AVLNode<T> *_insert_recurve(AVLNode<T> *&node, T value);
+    void _preorder_print(AVLNode<T> *cur){
+        if(cur!=nullptr){
+            cout<<cur->data();
+            _preorder_print(cur->left_node());
+            _preorder_print(cur->right_node());
+        }
+    }
+
+    void _inorder_print(AVLNode<T> *cur){
+        if(cur!=nullptr){
+            _inorder_print(cur->left_node());
+            cout<<cur->data();
+            _inorder_print(cur->right_node());
+        }
+    }
+    void _postorder_print(AVLNode<T> *cur){
+        if(cur!=nullptr){
+            _postorder_print(cur->left_node());
+            _postorder_print(cur->right_node());
+            cout<<cur->data();
+        }
+    }
+    void _destory(AVLNode<T>* &n){
+        if(n!=nullptr){
+            _destory(n->left_node());
+            _destory(n->right_node());
+            delete n;
+            n=nullptr;
+        }
     }
 
 private:
@@ -53,7 +150,7 @@ private:
 };
 
 
-#define INTERVAL 2
+#define INTERVAL            2
 #define LAYER_LINKER        '|'
 #define NODE_TOP            ' '
 #define BETEWEEN_TOP        '-'
@@ -63,13 +160,13 @@ private:
 #define NULL_NODE           ' '
 #define BETWEEN_LINKER      ' '
 template<typename T>
-ostream& operator<<(ostream& os,INode<T>* node){
-    vector<vector<INode<T>*>> v2d;
+ostream& operator<<(ostream& os,AVLNode<T>* node){
+    vector<vector<AVLNode<T>*>> v2d;
     v2d.push_back({node});
 
     for (size_t i=0;;i++) {
-        vector<INode<T>*> next_l;
-        for_each(v2d[i].begin(),v2d[i].end(),[&next_l](INode<T>* _n){
+        vector<AVLNode<T>*> next_l;
+        for_each(v2d[i].begin(),v2d[i].end(),[&next_l](AVLNode<T>*_n){
             if(_n!=nullptr){
                 next_l.push_back(_n->left_node());
                 next_l.push_back(_n->right_node());
@@ -86,9 +183,10 @@ ostream& operator<<(ostream& os,INode<T>* node){
             v2d.push_back(next_l);
         }
     }
+
     assert(INTERVAL%2==0);
     size_t total_l=v2d.size();
-
+//    cout<<"total_l = "<<total_l<<endl;
     for(size_t l=0;l<total_l;l++){
         stringstream vertical_line;
         stringstream horizontal_line;
@@ -124,7 +222,12 @@ ostream& operator<<(ostream& os,INode<T>* node){
                     f(horizontal_line,int(INTERVAL),NULL_NODE_TOP);
                 }
                 else{
-                    node<<setw(INTERVAL)<<(*it)->data();
+                    T parent_v=0;
+                    if((*it)->parent()!=nullptr){
+                        parent_v=((*it)->parent())->data();
+                    }
+//                    node<<setw(INTERVAL)<<(*it)->data();
+                    node<<(*it)->data()<<parent_v;
                     f(horizontal_line,int(node_interval*INTERVAL)/2,BETEWEEN_TOP);
                     f(horizontal_line,int(INTERVAL),NODE_TOP);
                 }
@@ -146,7 +249,12 @@ ostream& operator<<(ostream& os,INode<T>* node){
 
                 }
                 else{
-                    node<<setw(INTERVAL)<<(*it)->data();
+                    T parent_v=0;
+                    if((*it)->parent()!=nullptr){
+                        parent_v=((*it)->parent())->data();
+                    }
+//                    node<<setw(INTERVAL)<<(*it)->data();
+                    node<<(*it)->data()<<parent_v;
                     f(horizontal_line,int(INTERVAL),NODE_TOP);
                     f(horizontal_line,int(node_interval*INTERVAL)/2,BETEWEEN_TOP);
                 }
@@ -173,3 +281,105 @@ ostream& operator<<(ostream& os,INode<T>* node){
 
 
 #endif // AVL_H
+
+template<typename T>
+bool AVLTree<T>::insert(T value)
+{
+//    if(root==nullptr){
+//        root=new AVLNode<T>(value);
+//        return true;
+//    }
+    return _insert_recurve(root,value)==nullptr?false:true;
+}
+
+template<typename T>
+bool AVLTree<T>::remove(T value)
+{
+    AVLNode<T>* cur=root;
+    while (cur!=nullptr) {
+        if(cur->data()==value){
+            break;
+        }
+        if(value<cur->data()){
+            cur=cur->left_node();
+        }
+        else{
+            cur=cur->right_node();
+        }
+    }
+    if(cur==nullptr){
+        cout<<"no find delete node";
+        return false;
+    }
+    if(cur->right_node()==nullptr){
+
+    }
+}
+
+template<typename T>
+bool AVLTree<T>::_remove(AVLNode<T> *n, T value)
+{
+}
+
+template<typename T>
+AVLNode<T>* AVLTree<T>::_insert_recurve(AVLNode<T> *&node, T value)
+{
+    if(node==nullptr){
+        node=new AVLNode<T>(value);
+    }
+    else if(value<node->data()){    //add to left child
+        node->left_node(_insert_recurve(node->left_node(),value));
+        if(AVLNode<T>::height(node->left_node())-AVLNode<T>::height(node->right_node())==2){
+            if(value<node->left_node()->data()){
+                node=node->right_rotate();
+            }
+            else{
+                node=node->left_right_rotate();
+            }
+        }
+    }
+    else if(value>node->data()){    //add to right child
+//    else{
+        node->right_node(_insert_recurve(node->right_node(),value));
+        if(AVLNode<T>::height(node->right_node())-AVLNode<T>::height(node->left_node())==2){
+            if(value>node->right_node()->data()){
+                node=node->left_rotate();
+            }
+            else{
+                node=node->right_left_rotate();
+            }
+        }
+
+    }
+//    else{
+//        return nullptr;
+//    }
+    node->height(max(AVLNode<T>::height(node->left_node()),AVLNode<T>::height(node->right_node()))+1);
+    return node;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

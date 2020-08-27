@@ -16,7 +16,8 @@ template<typename T>
 struct INode{
     virtual INode* parent()const{return nullptr;}
     virtual void parent(INode*){}
-    virtual INode* left_node()const{return nullptr;}
+    virtual INode* left_node()const{
+        return nullptr;}
     virtual void left_node(INode*){}
     virtual INode* right_node()const{return nullptr;}
     virtual void right_node(INode*){}
@@ -76,7 +77,6 @@ private:
 template<typename T>
 CBinarySearchTree<T> &CBinarySearchTree<T>::insert(T value)
 {
-
     return _insert_recurve(root,value);
 }
 
