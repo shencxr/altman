@@ -108,10 +108,36 @@ int main(){
     {
 #if 1
         AVLTree<int> tree;
-        for(int i=0;i<64-1;i++){
+        for(int i=0;i<32-1;i++){
             cout<<i<<" insert : "<<tree.insert(i)<<endl;
         }
         cout<<tree.get_root();
+        cout<<"remove(26) : "<<tree.remove(26)<<endl;
+        cout<<tree.get_root();
+        cout<<"remove(27) : "<<tree.remove(27)<<endl;
+        cout<<tree.get_root();
+        cout<<"remove(15) : "<<tree.remove(15)<<endl;
+        cout<<tree.get_root();
+        cout<<"remove(0) : "<<tree.remove(0)<<endl;
+        cout<<tree.get_root();
+        cout<<"remove(2) : "<<tree.remove(2)<<endl;
+        cout<<tree.get_root();
+        cout<<"remove(1) : "<<tree.remove(1)<<endl;
+        cout<<tree.get_root();
+        cout<<"remove(7) : "<<tree.remove(7)<<endl;
+        cout<<tree.get_root();
+        cout<<"remove(16) : "<<tree.remove(16)<<endl;
+        cout<<tree.get_root();
+
+//        AVLTree<int> tree;
+//        for(int i=0;i<3;i++){
+//            cout<<i<<" insert : "<<tree.insert(i)<<endl;
+//        }
+//        cout<<tree.get_root();
+//        cout<<"remove(2) : "<<tree.remove(2)<<endl;
+//        cout<<tree.get_root();
+
+
 //        cout<<7<<" insert : "<<tree.insert(7)<<endl;
 //        cout<<tree.get_root();
 //        cout<<5<<" insert : "<<tree.insert(5)<<endl;

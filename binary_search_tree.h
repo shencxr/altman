@@ -100,7 +100,7 @@ CBinarySearchTree<T> &CBinarySearchTree<T>::_insert_recurve(BaseNode<T>* &n,T va
 }
 
 
-#define INTERVAL 2
+#define INTERVAL 6
 #define LAYER_LINKER        '|'
 #define NODE_TOP            ' '
 #define BETEWEEN_TOP        '-'

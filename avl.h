@@ -17,18 +17,33 @@ public:
             r->parent(this);
         }
     }
-
+    static AVLNode* maximum(AVLNode*node){
+        while (node->right_node()!=nullptr) {
+            node=node->right_node();
+        }
+        return node;
+    }
+    static AVLNode* minimum(AVLNode*node){
+        while (node->left_node()!=nullptr) {
+            node=node->left_node();
+        }
+        return node;
+    }
     AVLNode<T>* parent()const{return _parent;}
     AVLNode* &left_node(){
         return _left;}
     void left_node(AVLNode<T>*l){
         _left=l;
-        l->parent(this);
+        if(l!=nullptr){
+            l->parent(this);
+        }
     }
     AVLNode<T>* &right_node(){return _right;}
     void right_node(AVLNode<T>*r){
         _right=r;
-        r->parent(this);
+        if(r!=nullptr){
+            r->parent(this);
+        }
     }
     T data()const{return _data;}
     void data(T d){_data=d;}
@@ -81,8 +96,8 @@ public:
     }
 
 
-private:
     void parent(AVLNode<T>* p){_parent=p;}
+private:
     AVLNode<T> *_parent;
     AVLNode<T> *_left;
     AVLNode<T> *_right;
@@ -120,7 +135,7 @@ public:
         cout<<endl;
     }
 protected:
-    bool _remove(AVLNode<T> *n,T value);
+    AVLNode<T> *_remove(AVLNode<T> *&n,T value);
     AVLNode<T> *_insert_recurve(AVLNode<T> *&node, T value);
     void _preorder_print(AVLNode<T> *cur){
         if(cur!=nullptr){
@@ -157,8 +172,8 @@ private:
     AVLNode<T>* root;
 };
 
-#define PRINT_PARENT        0
-#define INTERVAL            4
+#define PRINT_PARENT        1
+#define INTERVAL            6
 #define LAYER_LINKER        '|'
 #define NODE_TOP            ' '
 #define BETEWEEN_TOP        '-'
@@ -306,33 +321,222 @@ bool AVLTree<T>::insert(T value)
     return _insert_recurve(root,value)==nullptr?false:true;
 }
 
+
 template<typename T>
 bool AVLTree<T>::remove(T value)
 {
-    AVLNode<T>* cur=root;
+#if 1
+    return _remove(root,value);
+#else
+
+    AVLNode<T> *cur=root;
+    AVLNode<T> *par=nullptr;
     while (cur!=nullptr) {
         if(cur->data()==value){
             break;
         }
-        if(value<cur->data()){
+        else if(value<cur->data()){
+            par=cur;
             cur=cur->left_node();
         }
         else{
+            par=cur;
             cur=cur->right_node();
         }
     }
     if(cur==nullptr){
-        cout<<"no find delete node";
+        cout<<"not find "<<value<<endl;
         return false;
     }
     if(cur->right_node()==nullptr){
+        if(par==nullptr){
+            cur->left_node()->parent(nullptr);
+            root=cur->left_node();
+        }
+        else{
+            if(cur->left_node()!=nullptr){
+                cur->left_node()->parent(par);
+            }
+            if(par->left_node()==cur){
+                par->left_node(cur->left_node());
+            }
+            else{
+                par->right_node(cur->left_node());
+            }
+        }
+        while(par!=nullptr){
+            if((AVLNode<T>::height(par->left_node())-AVLNode<T>::height(par->right_node()))==2){
+                //最小失衡树的根节点的 左树比右树高
+                if(AVLNode<T>::height(par->left_node()->left_node())>AVLNode<T>::height(par->left_node()->right_node())){
+                    par->right_rotate();
+                }
+                else{
+                    par->left_right_rotate();
+                }
+                break;
+            }
+            else if((AVLNode<T>::height(par->left_node())-AVLNode<T>::height(par->right_node()))==-2){
+                //最小失衡树的根节点的 右树比左树高
+                if(AVLNode<T>::height(par->right_node()->right_node())>AVLNode<T>::height(par->right_node()->left_node())){
+                    par->left_rotate();
+                }
+                else{
+                    par->right_left_rotate();
+                }
 
+                break;
+            }
+            par=par->parent();
+        }
+        delete cur;
+        cur=nullptr;
     }
+    else if(cur->left_node()==nullptr){
+        if(par==nullptr){
+            cur->right_node()->parent(nullptr);
+            root=cur->right_node();
+        }
+        else{
+            if(cur->right_node()!=nullptr){
+                cur->right_node()->parent(par);
+            }
+            if(par->left_node()==cur){
+                par->left_node(cur->right_node());
+            }
+            else{
+                par->right_node(cur->right_node());
+            }
+        }
+        while(par!=nullptr){
+            if((AVLNode<T>::height(par->left_node())-AVLNode<T>::height(par->right_node()))==2){
+                //最小失衡树的根节点的 左树比右树高
+                if(AVLNode<T>::height(par->left_node()->left_node())>AVLNode<T>::height(par->left_node()->right_node())){
+                    par->right_rotate();
+                }
+                else{
+                    par->left_right_rotate();
+                }
+                break;
+            }
+            else if((AVLNode<T>::height(par->left_node())-AVLNode<T>::height(par->right_node()))==-2){
+                //最小失衡树的根节点的 右树比左树高
+                if(AVLNode<T>::height(par->right_node()->right_node())>AVLNode<T>::height(par->right_node()->left_node())){
+                    par->left_rotate();
+                }
+                else{
+                    par->right_left_rotate();
+                }
+
+                break;
+            }
+            par=par->parent();
+        }
+        delete cur;
+        cur=nullptr;
+    }
+    else {
+        par=nullptr;
+        AVLNode<T> *left_in_right=cur->right_node();
+        while (left_in_right->left_node()!=nullptr) {
+            par=left_in_right;
+            left_in_right=left_in_right->left_node();
+        }
+        if(par==nullptr){
+            par->right_node(left_in_right->right_node());
+            cur->data(left_in_right->data());
+        }
+        else{
+            par->left_node(left_in_right->right_node());
+            cur->data(left_in_right->data());
+        }
+        while(par!=nullptr){
+            if((AVLNode<T>::height(par->left_node())-AVLNode<T>::height(par->right_node()))==2){
+                //最小失衡树的根节点的 左树比右树高
+                if(AVLNode<T>::height(par->left_node()->left_node())>AVLNode<T>::height(par->left_node()->right_node())){
+                    par->right_rotate();
+                }
+                else{
+                    par->left_right_rotate();
+                }
+                break;
+            }
+            else if((AVLNode<T>::height(par->left_node())-AVLNode<T>::height(par->right_node()))==-2){
+                //最小失衡树的根节点的 右树比左树高
+                if(AVLNode<T>::height(par->right_node()->right_node())>AVLNode<T>::height(par->right_node()->left_node())){
+                    par->left_rotate();
+                }
+                else{
+                    par->right_left_rotate();
+                }
+
+                break;
+            }
+            par=par->parent();
+        }
+        delete left_in_right;
+    }
+#endif
 }
 
 template<typename T>
-bool AVLTree<T>::_remove(AVLNode<T> *n, T value)
+AVLNode<T> * AVLTree<T>::_remove(AVLNode<T> *&cur, T value)
 {
+    if(cur!=nullptr){
+        if(cur->data()==value){
+            if(cur->left_node()!=nullptr&&cur->right_node()!=nullptr){
+                if(AVLNode<T>::height(cur->left_node())>AVLNode<T>::height(cur->right_node())){
+                    AVLNode<T> * del=AVLNode<T>::maximum(cur->left_node());
+                    cur->data(del->data());
+                    cur->left_node(_remove(cur->left_node(),del->data()));
+                }
+                else{
+                    AVLNode<T> * del=AVLNode<T>::minimum(cur->right_node());
+                    cur->data(del->data());
+                    cur->right_node(_remove(cur->right_node(),del->data()));
+                }
+            }
+            else{
+                AVLNode<T> *tmp=cur;
+                if(cur->left_node()!=nullptr){
+                    cur=cur->left_node();
+                }
+                else{
+                    cur=cur->right_node();
+                }
+                if(cur!=nullptr){
+                    cur->parent(tmp->parent());
+                }
+                delete tmp;
+            }
+        }
+        else if(value<cur->data()){
+            cur->left_node(_remove(cur->left_node(),value));
+            if(AVLNode<T>::height(cur->right_node())-AVLNode<T>::height(cur->left_node())==2){
+                if(AVLNode<T>::height(cur->right_node()->left_node())>AVLNode<T>::height(cur->right_node()->right_node())){
+                    cur=cur->right_left_rotate();
+                }
+                else{
+                    cur=cur->left_rotate();
+                }
+            }
+        }
+        else{
+            cur->right_node(_remove(cur->right_node(),value));
+            if(AVLNode<T>::height(cur->right_node())-AVLNode<T>::height(cur->left_node())==-2){
+                if(AVLNode<T>::height(cur->left_node()->left_node())>AVLNode<T>::height(cur->left_node()->right_node())){
+                    cur=cur->right_rotate();
+                }
+                else{
+                    cur=cur->left_right_rotate();
+                }
+            }
+
+        }
+        return cur;
+    }
+    else{
+        return nullptr;
+    }
 }
 
 template<typename T>
