@@ -19,11 +19,17 @@ public:
     }
 
     AVLNode<T>* parent()const{return _parent;}
-    AVLNode<T>* &left_node(){
+    AVLNode* &left_node(){
         return _left;}
-    void left_node(AVLNode<T>*l){_left=l;}
+    void left_node(AVLNode<T>*l){
+        _left=l;
+        l->parent(this);
+    }
     AVLNode<T>* &right_node(){return _right;}
-    void right_node(AVLNode<T>*r){_right=r;}
+    void right_node(AVLNode<T>*r){
+        _right=r;
+        r->parent(this);
+    }
     T data()const{return _data;}
     void data(T d){_data=d;}
     int height(void)const{return _height;}
@@ -33,7 +39,7 @@ public:
         AVLNode<T>* tmp=_right;
         _right=_right->_left;
         if(_right!=nullptr){
-            _left->parent(this);
+            _right->parent(this);
         }
         tmp->_left=this;
         tmp->parent(_parent);
@@ -54,11 +60,13 @@ public:
 
     AVLNode<T>* left_right_rotate(){
         _left=_left->left_rotate();
+        _left->parent(this);
         return right_rotate();
     }
 
     AVLNode<T>* right_left_rotate(){
         _right=_right->right_rotate();
+        _right->parent(this);
         return left_rotate();
     }
 
@@ -90,7 +98,7 @@ public:
     AVLTree(AVLNode<T>* r=nullptr):root(r){}
     bool insert(T value);
     bool remove(T value);
-    AVLNode<T>* get_root() const{
+    AVLNode<T>* get_root() {
         return root;
     }
     void destory(){
@@ -149,8 +157,8 @@ private:
     AVLNode<T>* root;
 };
 
-
-#define INTERVAL            2
+#define PRINT_PARENT        0
+#define INTERVAL            4
 #define LAYER_LINKER        '|'
 #define NODE_TOP            ' '
 #define BETEWEEN_TOP        '-'
@@ -163,7 +171,7 @@ template<typename T>
 ostream& operator<<(ostream& os,AVLNode<T>* node){
     vector<vector<AVLNode<T>*>> v2d;
     v2d.push_back({node});
-
+    node->left_node();
     for (size_t i=0;;i++) {
         vector<AVLNode<T>*> next_l;
         for_each(v2d[i].begin(),v2d[i].end(),[&next_l](AVLNode<T>*_n){
@@ -176,7 +184,7 @@ ostream& operator<<(ostream& os,AVLNode<T>* node){
                 next_l.push_back(nullptr);
             }
         });
-        if(all_of(next_l.begin(),next_l.end(),[](INode<T>* _n){return _n==nullptr?true:false;})==true){
+        if(all_of(next_l.begin(),next_l.end(),[](void* _n){return _n==nullptr?true:false;})==true){
             break;
         }
         else{
@@ -222,12 +230,15 @@ ostream& operator<<(ostream& os,AVLNode<T>* node){
                     f(horizontal_line,int(INTERVAL),NULL_NODE_TOP);
                 }
                 else{
-                    T parent_v=0;
+#if PRINT_PARENT
+                    T parent_v=9;
                     if((*it)->parent()!=nullptr){
                         parent_v=((*it)->parent())->data();
                     }
-//                    node<<setw(INTERVAL)<<(*it)->data();
-                    node<<(*it)->data()<<parent_v;
+                    node<<setw(INTERVAL/2)<<(*it)->data()<<setw(INTERVAL/2)<<parent_v;
+#else
+                    node<<setw(INTERVAL)<<(*it)->data();
+#endif
                     f(horizontal_line,int(node_interval*INTERVAL)/2,BETEWEEN_TOP);
                     f(horizontal_line,int(INTERVAL),NODE_TOP);
                 }
@@ -249,12 +260,15 @@ ostream& operator<<(ostream& os,AVLNode<T>* node){
 
                 }
                 else{
-                    T parent_v=0;
+#if PRINT_PARENT
+                    T parent_v=9;
                     if((*it)->parent()!=nullptr){
                         parent_v=((*it)->parent())->data();
                     }
-//                    node<<setw(INTERVAL)<<(*it)->data();
-                    node<<(*it)->data()<<parent_v;
+                    node<<setw(INTERVAL/2)<<(*it)->data()<<setw(INTERVAL/2)<<parent_v;
+#else
+                    node<<setw(INTERVAL)<<(*it)->data();
+#endif
                     f(horizontal_line,int(INTERVAL),NODE_TOP);
                     f(horizontal_line,int(node_interval*INTERVAL)/2,BETEWEEN_TOP);
                 }
@@ -351,9 +365,6 @@ AVLNode<T>* AVLTree<T>::_insert_recurve(AVLNode<T> *&node, T value)
         }
 
     }
-//    else{
-//        return nullptr;
-//    }
     node->height(max(AVLNode<T>::height(node->left_node()),AVLNode<T>::height(node->right_node()))+1);
     return node;
 }
