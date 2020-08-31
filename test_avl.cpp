@@ -89,6 +89,10 @@ public:
 }
 
 
+
+
+
+
 int main(){
     {
 #if 1
@@ -106,7 +110,7 @@ int main(){
 #endif
     }
     {
-#if 1
+#if 0
         AVLTree<int> tree;
         for(int i=0;i<32-1;i++){
             cout<<i<<" insert : "<<tree.insert(i)<<endl;
@@ -128,7 +132,14 @@ int main(){
         cout<<tree.get_root();
         cout<<"remove(16) : "<<tree.remove(16)<<endl;
         cout<<tree.get_root();
+        cout<<"remove(6) : "<<tree.remove(6)<<endl;
+        cout<<tree.get_root();
 
+        cout<<"remove(3) : "<<tree.remove(3)<<endl;
+        cout<<"remove(5) : "<<tree.remove(5)<<endl;
+        cout<<tree.get_root();
+        tree.inorder_print();
+        tree.inorder_print_stack();
 //        AVLTree<int> tree;
 //        for(int i=0;i<3;i++){
 //            cout<<i<<" insert : "<<tree.insert(i)<<endl;
@@ -188,6 +199,44 @@ int main(){
         using namespace test_template_design_pattern;
         child a;
         a.run();
+#endif
+    }
+    {
+#if 0
+        set<int> test_set;
+        for(int i=0;i<10;i++){
+            test_set.insert(10-i);
+        }
+        for_each(test_set.begin(),test_set.end(),[](int n){cout<<n<<" ";});
+        cout<<endl;
+        cout<<*test_set.find(0);
+        set<int>::iterator a;
+#endif
+    }
+    {
+#if 1
+        AVLTree<int> tree;
+        for(int i=0;i<32-1;i++){
+            cout<<i<<" insert : "<<tree.insert(i)<<endl;
+        }
+        cout<<tree.get_root();
+        AVLTree<int>::iterator myit=tree.begin();
+        cout<<"first : "<<*myit<<endl;
+        cout<<"sec   : "<<*++myit<<endl;
+        cout<<"thrid : "<<*++myit<<endl;
+
+        AVLTree<int>::iterator myit2=tree.begin();
+        cout<<"first : "<<*myit2<<endl;
+        cout<<"sec   : "<<*myit2++<<endl;
+        cout<<"thrid : "<<*myit2++<<endl;
+        cout<<"fifth : "<<*myit2<<endl;
+
+#endif
+    }
+    {
+#if 0
+        vector<int> c;
+        cout<<(c.begin()==c.end())<<endl;
 #endif
     }
     return 0;

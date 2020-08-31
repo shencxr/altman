@@ -12,4 +12,5 @@ SOURCES += \
 HEADERS += \
     test_driver.h \
     binary_search_tree.h \
-    avl.h
+    avl.h \
+    myiterator.h

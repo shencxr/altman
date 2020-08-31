@@ -2,7 +2,7 @@
 #define AVL_H
 
 #include "binary_search_tree.h"
-
+#include <stack>
 
 
 
@@ -106,10 +106,61 @@ private:
 };
 
 
+#include <iterator>
+#include <stack>
+#include <vector>
+template<typename T>
+class MyIterator:public iterator<forward_iterator_tag,T>{
+public:
+    //采用中序遍历顺序，先左子树，再根，后右子树
+    MyIterator(AVLNode<T>* begin){
+        _init_sequence(begin);
+        ptr=sequence.begin();
+    }
+    MyIterator(AVLNode<T>* begin,int){
+        sequence.push_back(begin);
+        ptr=sequence.begin();
+    }
+
+    T operator *(){
+        return (*ptr)->data();
+    }
+
+    MyIterator& operator ++(){
+        ++ptr;
+        return *this;
+    }
+
+    MyIterator operator ++(int){
+        AVLNode<T>*tmp=(*ptr);
+        ++ptr;
+        return MyIterator<T>(tmp,3);
+    }
+
+
+protected:
+    void _init_sequence(AVLNode<T>*cur){
+        if(cur!=nullptr){
+            if(cur->left_node()!=nullptr){
+                _init_sequence(cur->left_node());
+            }
+            sequence.push_back(cur);
+            if(cur->right_node()!=nullptr){
+                _init_sequence(cur->right_node());
+            }
+        }
+    }
+private:
+    vector<AVLNode<T>*> sequence;
+    typename vector<AVLNode<T>*>::iterator ptr;
+};
 
 template<typename T>
 class AVLTree{
 public:
+
+    typedef MyIterator<T> iterator;
+
     AVLTree(AVLNode<T>* r=nullptr):root(r){}
     bool insert(T value);
     bool remove(T value);
@@ -134,12 +185,44 @@ public:
         _postorder_print(root);
         cout<<endl;
     }
+    void inorder_print_stack(void){
+        cout<<"inorder traversal   : ";
+        sequence.push(root);
+        _inorder_print_stack();
+        cout<<endl;
+    }
+
+    iterator begin(){
+        return iterator(root);
+    }
+
+
+    iterator end(){
+        return iterator(nullptr);
+    }
+
+    stack<AVLNode<T> *> sequence;
+    void _inorder_print_stack(void){
+        if(!sequence.empty()){
+            AVLNode<T> * cur=sequence.top();
+            if(cur->left_node()!=nullptr){
+                sequence.push(cur->left_node());
+                _inorder_print_stack();
+            }
+            cout<<cur->data()<<" ";
+            if(cur->right_node()!=nullptr){
+                sequence.push(cur->right_node());
+                _inorder_print_stack();
+            }
+            sequence.pop();
+        }
+    }
 protected:
     AVLNode<T> *_remove(AVLNode<T> *&n,T value);
     AVLNode<T> *_insert_recurve(AVLNode<T> *&node, T value);
     void _preorder_print(AVLNode<T> *cur){
         if(cur!=nullptr){
-            cout<<cur->data();
+            cout<<cur->data()<<" ";
             _preorder_print(cur->left_node());
             _preorder_print(cur->right_node());
         }
@@ -148,7 +231,7 @@ protected:
     void _inorder_print(AVLNode<T> *cur){
         if(cur!=nullptr){
             _inorder_print(cur->left_node());
-            cout<<cur->data();
+            cout<<cur->data()<<" ";
             _inorder_print(cur->right_node());
         }
     }
@@ -156,7 +239,7 @@ protected:
         if(cur!=nullptr){
             _postorder_print(cur->left_node());
             _postorder_print(cur->right_node());
-            cout<<cur->data();
+            cout<<cur->data()<<" ";
         }
     }
     void _destory(AVLNode<T>* &n){
@@ -572,6 +655,7 @@ AVLNode<T>* AVLTree<T>::_insert_recurve(AVLNode<T> *&node, T value)
     node->height(max(AVLNode<T>::height(node->left_node()),AVLNode<T>::height(node->right_node()))+1);
     return node;
 }
+
 
 
 
