@@ -115,6 +115,7 @@ public:
     //采用中序遍历顺序，先左子树，再根，后右子树
     MyIterator(AVLNode<T>* begin){
         _init_sequence(begin);
+        sequence.push_back(nullptr);
         ptr=sequence.begin();
     }
     MyIterator(AVLNode<T>* begin,int){
@@ -123,7 +124,18 @@ public:
     }
 
     T operator *(){
+//        if(*ptr==nullptr){
+//            return 0;
+//        }
         return (*ptr)->data();
+    }
+
+    bool operator!=(const MyIterator& it){
+        return *ptr!=*it.ptr;
+    }
+
+    bool operator==(const MyIterator& it){
+        return *ptr==*it.ptr;
     }
 
     MyIterator& operator ++(){

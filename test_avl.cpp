@@ -231,6 +231,17 @@ int main(){
         cout<<"thrid : "<<*myit2++<<endl;
         cout<<"fifth : "<<*myit2<<endl;
 
+
+        for_each(tree.begin(),tree.end(),[](int n){cout<<n<<endl;});
+//        for(auto it=tree.begin();it!=tree.end();++it){
+//            cout<<*it<<endl;
+//        }
+        cout<<"none_of = : "<<none_of(tree.begin(),tree.end(),[](int n){return n==80;})<<endl;
+        cout<<"is_sorted = : "<<is_sorted(tree.begin(),tree.end())<<endl;
+        int arr1[]={1,2,3,4};
+        cout<<"is_sorted = : "<<is_sorted(arr1,arr1+4)<<endl;
+
+        cout<<"end"<<endl;
 #endif
     }
     {
