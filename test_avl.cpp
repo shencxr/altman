@@ -90,7 +90,7 @@ public:
 
 
 
-
+#if 0
 
 
 int main(){
@@ -214,7 +214,7 @@ int main(){
 #endif
     }
     {
-#if 1
+#if 0
         AVLTree<int> tree;
         for(int i=0;i<32-1;i++){
             cout<<i<<" insert : "<<tree.insert(i)<<endl;
@@ -250,6 +250,19 @@ int main(){
         cout<<(c.begin()==c.end())<<endl;
 #endif
     }
+    {
+        vector<int> a{1,2,3,4,5,6};
+        vector<int> b=a;
+        for_each(a.begin(),a.end(),[](int n){cout<<n<<" ";});
+        cout<<endl;
+//        vector<int> b=a;
+        copy(a.begin()+1,a.end()-1,a.begin());
+        for_each(a.begin(),a.end(),[](int n){cout<<n<<" ";});
+        cout<<endl;
+        copy_backward(a.begin()+1,a.begin()+2,b.end());
+        for_each(b.begin(),b.end(),[](int n){cout<<n<<" ";});
+        cout<<endl;
+    }
     return 0;
 }
 
@@ -258,7 +271,7 @@ int main(){
 
 
 
-
+#endif
 
 
 

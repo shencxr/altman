@@ -7,7 +7,8 @@ SOURCES += \
         main.cpp \
     test_driver.cpp \
     test.cpp \
-    test_avl.cpp
+    test_avl.cpp \
+    singleton.cpp
 
 HEADERS += \
     test_driver.h \
