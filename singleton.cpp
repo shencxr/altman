@@ -45,12 +45,23 @@ chip *chip::get_chip()
 }
 #endif
 
+enum test_enum{
+    xxx=256,
+    ccc=257,
+    cca=258,
+    ccb=259,
+    ccas=31,
+    ccbs=42
+};
+
+
 int main(){
     chip::get_chip();
     chip::get_chip();
     chip::get_chip();
     chip::get_chip();
     atomic_bool b;
+    cout<<sizeof (test_enum)<<endl;
 }
 
 
