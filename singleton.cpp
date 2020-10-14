@@ -54,15 +54,90 @@ enum test_enum{
     ccbs=42
 };
 
+#include <memory>
 
-int main(){
-    chip::get_chip();
-    chip::get_chip();
-    chip::get_chip();
-    chip::get_chip();
-    atomic_bool b;
-    cout<<sizeof (test_enum)<<endl;
+template<typename T>
+struct myclass{
+    T data;
+    myclass(T d):data(d){
+        cout<<"myclass construct\n";
+    }
+    ~myclass(){
+        cout<<"myclass deconstruct,data = "<<data<<"\n";
+    }
+};
+
+
+int smain(){
+    {
+#if 0
+        chip::get_chip();
+        chip::get_chip();
+        chip::get_chip();
+        chip::get_chip();
+        atomic_bool b;
+        cout<<sizeof (test_enum)<<endl;
+#endif
+    }
+    {
+#if 0
+        unique_ptr<myclass<string>> a;
+        if(a==nullptr){
+            cout<<"a==nullptr\n";
+        }
+        unique_ptr<myclass<string>> b(new myclass<string>(string("hello world")));
+        cout<<"b.data:"<<(*b).data<<endl;
+        a.reset(move(b.get()));
+        cout<<"b.data:"<<(*b).data<<endl;
+        cout<<"a.data:"<<(*a).data<<endl;
+#endif
+    }
+    {
+#if 1
+//        unique_ptr<myclass<int>> a;
+//        if(a==nullptr){
+//            cout<<"a==nullptr\n";
+//        }
+        unique_ptr<myclass<int>> b(new myclass<int>(3));
+        cout<<"b.data:"<<(*b).data<<endl;
+        unique_ptr<myclass<int>> a=(move(b));
+        if(b==nullptr){
+            cout<<"b==nullptr\n";
+        }
+        else{
+            cout<<"b.data:"<<(*b).data<<endl;
+        }
+        cout<<"a.data:"<<(*a).data<<endl;
+        cout<<"print ...\n";
+        a.reset(new myclass<int>(4));
+        cout<<"out\n";
+#endif
+    }
+    return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
